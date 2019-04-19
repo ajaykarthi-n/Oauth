@@ -69,5 +69,7 @@ public class STIClient {
 		ResponseEntity<TokenResponse> response = getRestTemplate().exchange("http://localhost:8080/oauth/token", HttpMethod.POST, request, TokenResponse.class);	
 		System.out.println(response.getBody());
 	}
+	
+	//http://websystique.com/spring-security/secure-spring-rest-api-using-basic-authentication/
 
 }
