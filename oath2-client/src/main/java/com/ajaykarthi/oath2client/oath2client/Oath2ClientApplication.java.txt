@@ -1,0 +1,46 @@
+package com.ajaykarthi.oath2client.oath2client;
+
+import java.util.Arrays;
+
+import org.junit.Rule;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.oauth2.client.DefaultOAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestTemplate;
+import org.springframework.security.oauth2.client.token.DefaultAccessTokenRequest;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsAccessTokenProvider;
+import org.springframework.security.oauth2.client.token.grant.client.ClientCredentialsResourceDetails;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
+
+@SpringBootApplication
+public class Oath2ClientApplication {
+
+
+	@Rule
+	public ServerRunning serverRunning = ServerRunning.isRunning();
+
+	public static void main(String[] args) {
+		SpringApplication.run(Oath2ClientApplication.class, args);
+		
+	}
+	
+	public void testConnectDirectlyToResourceServer() throws Exception {
+
+		ClientCredentialsResourceDetails resource = new ClientCredentialsResourceDetails();
+
+		resource.setAccessTokenUri(serverRunning.getUrl("/sparklr2/oauth/token"));
+		resource.setClientId("my-client-with-registered-redirect");
+		resource.setId("sparklr");
+		resource.setScope(Arrays.asList("trust"));
+
+		ClientCredentialsAccessTokenProvider provider = new ClientCredentialsAccessTokenProvider();
+		OAuth2AccessToken accessToken = provider.obtainAccessToken(resource, new DefaultAccessTokenRequest());
+
+		OAuth2RestTemplate template = new OAuth2RestTemplate(resource, new DefaultOAuth2ClientContext(accessToken));
+		String result = template.getForObject(serverRunning.getUrl("/sparklr2/photos/trusted/message"), String.class);
+		assertEquals("Hello, Trusted Client", result);
+
+	}
+	
+		
+}
